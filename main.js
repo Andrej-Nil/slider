@@ -50,8 +50,6 @@ class Slider {
     return clone;
   }
 
-
-
   next = () => {
     this.index >= this.quantitySlides - 1 ? false : this.index++;
     this.track.style.transition = "transform .3s ease-in-out";
