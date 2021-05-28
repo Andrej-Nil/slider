@@ -19,15 +19,24 @@ class Slider {
   }
 
   navigation = () => {
-    this.nextBtn.addEventListener('click', this.next)
-    this.prevBtn.addEventListener('click', this.prev)
+    if (this.nextBtn) {
+      this.nextBtn.addEventListener('click', this.next);
+    }
+
+    if (this.prevBtn) {
+      this.prevBtn.addEventListener('click', this.prev);
+    }
+
+    if (this.dots) {
+      this.dots.addEventListener('click', this.dotNavigation);
+    }
   }
 
   cloneFirstAndLastSlides = () => {
     const firstSlide = this.track.firstElementChild;
     const lastSlide = this.track.lastElementChild;
-    const firstSlideClone = this.createSlideClone(firstSlide, 'lastSlideClone')
-    const lastSlideClone = this.createSlideClone(lastSlide, 'firstSlideClone')
+    const firstSlideClone = this.createSlideClone(firstSlide, 'last')
+    const lastSlideClone = this.createSlideClone(lastSlide, 'first')
     this.track.prepend(lastSlideClone);
     this.track.append(firstSlideClone);
   }
@@ -36,15 +45,13 @@ class Slider {
     const clone = document.createElement('span')
     clone.innerHTML = donorSlide.innerHTML;
     clone.classList.add('slide')
-    clone.setAttribute('data-idx', valueDataAttr);
+    clone.setAttribute('data-clone', valueDataAttr);
     clone.setAttribute('data-slide', '');
     return clone;
   }
 
-  setPositionTrack = () => {
-    const position = this.getShistTrack()
-    this.track.style.transform = `translateX(-${position}px)`;
-  }
+
+
   next = () => {
     this.index >= this.quantitySlides - 1 ? false : this.index++;
     this.track.style.transition = "transform .3s ease-in-out";
@@ -59,21 +66,38 @@ class Slider {
     this.changingTrackPositionByReachingEdge();
   }
 
+  dotNavigation = (e) => {
+    const dot = e.target.closest('[data-dot]');
+    if (!dot) {
+      return;
+    }
+    const dotIdx = dot.dataset.idx;
+    this.index = dotIdx;
+    this.track.style.transition = "transform .3s ease-in-out";
+    this.setPositionTrack();
+  }
+
+
+
+  setPositionTrack = () => {
+    const position = this.getShiftTrack()
+    this.track.style.transform = `translateX(-${position}px)`;
+  }
+  getShiftTrack = () => {
+    return this.index * this.slideWidth;
+  }
+
   changingTrackPositionByReachingEdge = () => {
     this.track.addEventListener('transitionend', () => {
-      this.slides[this.index].getAttribute('data-idx') === 'lastSlideClone' ? this.index = 1 : this.index;
+      this.slides[this.index].dataset.clone === 'last' ? this.index = 1 : this.index;
 
-      this.slides[this.index].getAttribute('data-idx') === 'firstSlideClone' ? this.index = this.quantitySlides - 2 : this.index;
+      this.slides[this.index].dataset.clone === 'first' ? this.index = this.quantitySlides - 2 : this.index;
 
       this.track.style.transition = "none";
 
       this.setPositionTrack()
 
     })
-  }
-
-  getShistTrack = () => {
-    return this.index * this.slideWidth;
   }
 }
 
